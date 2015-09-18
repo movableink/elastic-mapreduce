@@ -1,5 +1,5 @@
 #
-# Copyright 2008-2010 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 
 require 'commands'
 require 'test/unit'
@@ -66,11 +66,11 @@ module Commands
       }
     end
 
-    def self.new_aws_query(config)
-      return MockEMRClient.new(config)
+    def client
+      return self
     end
-
-    def DescribeJobFlows(args)
+    
+    def describe_job_flows(args)
       steps = []
       if args["JobFlowIds"] != nil and @step_map.has_key? args["JobFlowIds"].first then
         steps = [@step_map[args["JobFlowIds"].first]]
@@ -160,23 +160,23 @@ module Commands
       }
     end
 
-    def RunJobFlow(opts)
+    def run_job_flow(opts)
       return { "JobFlowId" => "j-ABABABABA" }
     end
 
-    def AddJobFlowSteps(opts)
+    def add_job_flow_steps(opts)
       return nil
     end
 
-    def TerminateJobFlows(opts)
+    def terminate_job_flows(opts)
       return nil
     end
 
-    def ModifyInstanceGroups(opts)
+    def modify_instance_groups(opts)
       return nil
     end
 
-    def AddInstanceGroups(opts)
+    def add_instance_groups(opts)
       return nil
     end
 
@@ -296,6 +296,8 @@ module Commands
       assert_equal(pig_command.args, ["s3://maps.google.com", "-p", "INPUT=s3://maps.google.com/test.pig"])
       assert_equal(pig_command.steps.size, 1)
       args = pig_script_command_default_args
+      args.insert(3, "--pig-versions")
+      args.insert(4, "latest")
       args << "s3://maps.google.com" << "-p" << "INPUT=s3://maps.google.com/test.pig"
       assert_equal(hadoop_jar_step_args(pig_command), args)
       
@@ -324,6 +326,8 @@ module Commands
       assert_equal(hive_command.args, ["s3://maps.google.com"])
       assert_equal(hive_command.steps.size, 1)
       args = hive_script_command_default_args
+      args.insert(3, "--hive-versions")
+      args.insert(4, "latest")
       args << "s3://maps.google.com" 
       assert_equal(hadoop_jar_step_args(hive_command), args)
     end
@@ -345,7 +349,7 @@ module Commands
       args = hive_script_command_default_args
       args.insert(3, "--hive-versions")
       args.insert(4, "0.5")
-      args  <<"s3://maps.google.com"
+      args  << "s3://maps.google.com"
       assert_equal(hadoop_jar_step_args(hive_command), args)
     end
 
@@ -427,6 +431,8 @@ module Commands
       assert_equal(hive_command.args, ["s3://maps.google.com"])
       assert_equal(hive_command.steps.size, 1)
       args = hive_script_command_default_args
+      args.insert(3, "--hive-versions")
+      args.insert(4, "latest")
       args << "s3://maps.google.com" 
       assert_equal(hadoop_jar_step_args(hive_command), args)
     end
@@ -447,6 +453,8 @@ module Commands
       assert_equal(hive_command.args, ["-d", "options"])
       assert_equal(hive_command.steps.size, 1)
       args = hive_script_command_default_args
+      args.insert(3, "--hive-versions")
+      args.insert(4, "latest")
       args << "s3://maps.google.com" << "-d" << "options"
       assert_equal(hadoop_jar_step_args(hive_command), args)
     end   
@@ -591,6 +599,12 @@ module Commands
       assert_equal('https://ec2.us-west-1.amazonaws.com', eip_command.ec2_endpoint_from_az('ec2.us-west-1b'))
       assert_equal('https://ec2.us-west-2.amazonaws.com', eip_command.ec2_endpoint_from_az('ec2.us-west-2b'))
       assert_equal('https://ec2.sa-east-1.amazonaws.com', eip_command.ec2_endpoint_from_az('ec2.sa-east-1b'))
+    end
+
+    def test_hbase_instance_types
+      assert_raise RuntimeError do
+        @commands = create_and_execute_commands("-c tests/credentials.json --create --hbase")
+      end
     end
 
   end

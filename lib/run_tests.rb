@@ -1,5 +1,5 @@
 #
-# Copyright 2008-2010 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 
 $LOAD_PATH << File.dirname(__FILE__)
 

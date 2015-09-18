@@ -134,7 +134,9 @@ http://aws.amazon.com website under "Your Account/Access Identifiers"
     "private-key": "<insert your AWS secret access key here>",
     "key-pair": "<insert the name of your Amazon ec2 key-pair here>",
     "key-pair-file": "<insert the path to the .pem file for your Amazon ec2 key pair here>",
-    "region": "<The region where you wish to launch your job flows. Should be one of us-east-1, us-west-1, us-west-2, eu-west-1, ap-southeast-1, or ap-northeast-1, sa-east-1>"    
+    "region": "<The region where you wish to launch your job flows. Should be
+    one of us-east-1, us-west-1, us-west-2, eu-west-1, ap-southeast-1,
+    ap-southeast-2, ap-northeast-1, sa-east-1, us-gov-west-1 or cn-north-1>"
   }
 
 Windows Users: If you are running a Windows computer then create a
@@ -946,64 +948,5 @@ to specify the file name, excluding ".json".
  string   slaveInstanceType
  string   hadoopVersion
 
-== Using the Ruby Client as a Library
-
-The program elastic-mapreduce is an example of how to use the
-Amazon Elastic MapReduce Ruby library. Most of the library is
-devoted to parsing command line arguments and translating them into
-web service calls. 
-
-To use the web service directly in your Ruby programs you need:
-
-  $LOAD_PATH << File.dirname(__FILE__)
-  require 'amazon/coral/elasticmapreduceclient'
-
-  config = {
-    :endpoint            => "https://elasticmapreduce.amazonaws.com",
-    :ca_file             => File.join(File.dirname(__FILE__), "cacert.pem"),
-    :aws_access_key      => my_access_id,
-    :aws_secret_key      => my_secret_key,
-    :signature_algorithm => :V2
-  }
-  client = Amazon::Coral::ElasticMapReduceClient.new_aws_query(config)
-
-  puts client.DescribeJobFlows.inspect
-  puts client.DescribeJobFlows('JobFlowId' => 'j-ABAYAS1019012').inspect
-
-You can use the retry delegator to make your client retry if it gets
-connection failures.
-
-  $LOAD_PATH << File.dirname(__FILE__)
-  require 'amazon/coral/elasticmapreduceclient'
-  require 'amazon/retry_delegator'
-
-  config = {
-    :endpoint            => "https://elasticmapreduce.amazonaws.com",
-    :ca_file             => File.join(File.dirname(__FILE__), "cacert.pem"),
-    :aws_access_key      => my_access_id,
-    :aws_secret_key      => my_secret_key,
-    :signature_algorithm => :V2
-  }
-  client = Amazon::Coral::ElasticMapReduceClient.new_aws_query(config)
-
-  is_retryable_error_response = Proc.new do |response| 
-    if response == nil then
-      false
-    else
-      ret = false
-      if response['Error'] then 
-        # don't retry on 'Timeout' because the call might have succeeded
-        ret ||= ['InternalFailure', 'Throttling', 'ServiceUnavailable'].include?(response['Error']['Code'])
-      end
-      ret 
-    end
-  end
-
-  client = Amazon::RetryDelegator.new(client, :retry_if => is_retryable_error_response)
-
-  puts client.DescribeJobFlows.inspect
-  puts client.DescribeJobFlows('JobFlowId' => 'j-ABAYAS1019012').inspect
-
 More information about the operations of the Amazon Elastic MapReduce
 Web Service is available in the technical documentation found at http://aws.amazon.com/documentation/elasticmapreduce/.
-

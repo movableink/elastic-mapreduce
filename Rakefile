@@ -29,8 +29,13 @@ require 'fileutils'
 
 desc 'update files from original git repository'
 task :update do
-  system 'git submodule update --init'
+  # system 'git submodule update --init'
   include FileUtils
+
+  rm_r('vendor')
+  mkdir_p('vendor/elastic-mapreduce-ruby')
+  system 'wget http://elasticmapreduce.s3.amazonaws.com/elastic-mapreduce-ruby.zip -O vendor/elastic-mapreduce-ruby.zip'
+  system 'cd vendor/elastic-mapreduce-ruby && unzip ../elastic-mapreduce-ruby.zip'
 
   rm_r('lib')
   mkdir_p('lib')
@@ -39,7 +44,7 @@ task :update do
 
   Dir.glob(target_dir + '*').each do |file|
     case file
-    when /\/(amazon|json|uuidtools|.*\.rb|cacert\.pem)$/
+    when /\/(aws|json|net|uuidtools|.*\.rb|cacert\.pem)$/
       cp_r(file, 'lib/')
     when /\/elastic-mapreduce$/
       cp_r(file, 'bin/')

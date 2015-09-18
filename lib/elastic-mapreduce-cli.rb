@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright 2008-2011 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+# Copyright 2011-2013 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
 
 require 'commands'
 require 'simple_logger'
@@ -11,7 +11,7 @@ begin
   logger = SimpleLogger.new
   executor = SimpleExecutor.new
   commands = Commands::create_and_execute_commands(
-    ARGV, Amazon::Coral::ElasticMapReduceClient, logger, executor
+    ARGV, AWS::EMR, logger, executor
   )
 rescue SystemExit => e
   exit_code = -1
